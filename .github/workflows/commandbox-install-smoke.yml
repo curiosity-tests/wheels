@@ -1,4 +1,5 @@
 name: CommandBox install smoke (ForgeBox path)
+run-name: "CommandBox install smoke (ForgeBox path) ${{ inputs.leg || github.event_name }} ${{ inputs.racecar_run }}"
 
 # Durability net for the ForgeBox/CommandBox install path (issues #3173, #3174,
 # #3176, #3177). The published ForgeBox channel was repaired across a campaign:
@@ -59,6 +60,24 @@ on:
       # The workflow itself.
       - '.github/workflows/commandbox-install-smoke.yml'
 
+  workflow_dispatch:
+    inputs:
+      leg:
+        description: "baseline (uninstrumented) or instrumented (under chalk/curiosity)"
+        type: choice
+        options: [instrumented, baseline]
+        default: baseline
+      profile:
+        description: "CrashOverride chalk profile"
+        type: string
+        default: curiosity-tests-racecar
+      racecar_run:
+        description: "racecar correlation token, echoed into the run name"
+        type: string
+        default: ""
+
+env:
+  CHALK_ON: ${{ inputs.leg == 'instrumented' }}
 permissions:
   contents: read
 
