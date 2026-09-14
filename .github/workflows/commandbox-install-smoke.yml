@@ -79,6 +79,7 @@ on:
 env:
   CHALK_ON: ${{ inputs.leg == 'instrumented' }}
 permissions:
+  id-token: write
   contents: read
 
 jobs:
@@ -113,8 +114,15 @@ jobs:
           }
           git --version
 
-      - uses: actions/checkout@v5
-
+      - uses: crashappsec/action-checkout@main
+        with:
+          chalk: ${{ env.CHALK_ON }}
+          profile: ${{ inputs.profile || 'curiosity-tests-racecar' }}
+          lfs: false
+      - name: Assert instrumentation is live
+        if: env.CHALK_ON == 'true'
+        run: |
+          test -n "${CURIOSITY_ROOT:-}" || { echo "::error::CURIOSITY_ROOT unset - observables never installed"; exit 1; }
       - name: Assert the export-ignored paths actually checked out
         run: |
           test -f tools/build/scripts/prepare-base.sh || {
